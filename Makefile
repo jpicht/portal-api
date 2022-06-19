@@ -26,18 +26,18 @@ import-legacy-db:
 	$(MYSQL) -e 'DROP DATABASE IF EXISTS legacy'
 	$(MYSQL) -e 'CREATE USER IF NOT EXISTS "summer-hannover"'
 	$(MYSQL) -e 'CREATE DATABASE legacy'
-	$(MYSQL) -B legacy < legacy-data.sql
+	$(MYSQL) -B legacy < legacy/data.sql
 
 migrate:
-	migrate -database mysql://root:dbpass@/portal -path db up
+	migrate -database mysql://root:dbpass@/portal -path migrations/db up
 
 test-legacy-migrate: need-legacy-db
 	$(MYSQL) -e 'DROP DATABASE IF EXISTS migrate'
 	$(MYSQL) -e 'DROP DATABASE IF EXISTS clean'
 	$(MYSQL) -e 'CREATE DATABASE migrate'
 	$(MYSQL) -e 'CREATE DATABASE clean'
-	migrate -database mysql://root:dbpass@/clean -path db up
-	migrate -database mysql://root:dbpass@/migrate -path legacy up
+	migrate -database mysql://root:dbpass@/clean -path migrations/db up
+	migrate -database mysql://root:dbpass@/migrate -path migrations/legacy up
 	diff -uw \
 		<( $(MYSQLDUMP) --compact --no-data clean | sed 's/ AUTO_INCREMENT=[0-9]*//g' ) \
 		<( $(MYSQLDUMP) --compact --no-data migrate | sed 's/ AUTO_INCREMENT=[0-9]*//g' )
